@@ -96,24 +96,25 @@ function player(pname,runs,balls,fours,sixes,sr,teamName){
         fs.mkdirSync(teamFolderPath);
     }
 
-    let pMatchStats = [teamName,pname,balls,fours,sixes,sr,runs];
+    let parr = [];
     
-    // let pMatchStats = {
-    //     Team:teamName,
-    //     Name:pname,
-    //     Balls:balls,
-    //     Fours:fours,
-    //     Sixes:sixes,
-    //     Sr:sr,
-    //     Runs:runs
-    // }
+    let pMatchStats = {
+        Team:teamName,
+        Name:pname,
+        Balls:balls,
+        Fours:fours,
+        Sixes:sixes,
+        Sr:sr,
+        Runs:runs
+    }
 
-    
+    parr.push(pMatchStats);
+
     let playerPath = path.join(teamFolderPath,pname+".json");
     isplayerFilexists = fs.existsSync(playerPath);
     
     if(isplayerFilexists != true){
-        let content = JSON.stringify(pMatchStats);
+        let content = JSON.stringify(parr);
         fs.writeFileSync(playerPath,content);
     } else {
         let content = fs.readFileSync(playerPath);
