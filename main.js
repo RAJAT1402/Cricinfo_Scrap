@@ -42,7 +42,7 @@ function allMatch(err,res,body){
 }
 
 function allMatchPage(err,res,body){
-    // console.log("-------------------------------------------------------------------------------------------------------------------------------");
+    console.log("-------------------------------------------------------------------------------------------------------------------------------");
     if(err){
         console.log("Wrong URL");
     } else {
@@ -71,7 +71,7 @@ function allMatchPage(err,res,body){
                     let fours = st(cols[5]).text().trim();
                     let sixes = st(cols[6]).text().trim();
                     let sr = st(cols[7]).text().trim();
-                    // console.log(pname + "  " + runs + " " + balls + " " + fours + " " + sixs + " " + sr + "           " + teamName);
+                    console.log(pname + " ,runs -> " + runs + " ,balls -> " + balls + " ,fours -> " + fours + " ,sixes -> " + sixes + " ,sr -> " + sr + " played for " + teamName);
                     player(pname,runs,balls,fours,sixes,sr,teamName);
                 }
             }         
@@ -101,30 +101,61 @@ function player(pname,runs,balls,fours,sixes,sr,teamName){
     let pMatchStats = {
         Team:teamName,
         Name:pname,
+        Runs:runs,
         Balls:balls,
         Fours:fours,
         Sixes:sixes,
-        Sr:sr,
-        Runs:runs
+        Sr:sr
     }
 
     parr.push(pMatchStats);
 
-    let playerPath = path.join(teamFolderPath,pname+".json");
-    isplayerFilexists = fs.existsSync(playerPath);
+    let playerFilePath = path.join(teamFolderPath,pname+".xlsx");
+    isplayerFilexists = fs.existsSync(playerFilePath);
     
     if(isplayerFilexists != true){
-        let content = JSON.stringify(parr);
-        fs.writeFileSync(playerPath,content);
+        // let content = JSON.stringify(parr);
+        // fs.writeFileSync(playerFilePath,content);
+
+            //create file
+            parr = [pMatchStats];
     } else {
-        let content = fs.readFileSync(playerPath);
-        let jsonData = JSON.parse(content);
+           parr = excelReader(playerFilePath,pname);
+           parr.push(pMatchStats);
+    //     let content = fs.readFileSync(playerFilePath);
+    //     let jsonData = JSON.parse(content);
         
-        jsonData.push(pMatchStats);
-        let jsonWriteAble = JSON.stringify(jsonData);
+    //     jsonData.push(pMatchStats);
+    //     let jsonWriteAble = JSON.stringify(jsonData);
         
-        fs.writeFileSync(playerPath,jsonWriteAble);
+    //     fs.writeFileSync(playerFilePath,jsonWriteAble);
+    }
+    excelWriter(playerFilePath,parr,pname);
+}
+
+function excelReader(filePath,name){
+    if(!fs.existsSync(filePath)){
+        return null;
+    }
+    else{
+        // workbook =>excel
+        let wt = xlsx.readFile(filePath);
+        //get data from notebook
+        let excelData = wt.Sheets[name];
+        // convert excel format to json => array of obj
+        let ans = xlsx.utils.sheet_to_json(excelData);
+        return ans;
+
     }
 
+}
 
+function excelWriter(filePath,json,name){
+    // console.log(xlsx.readFile(filePath));
+    let newWB = xlsx.utils.book_new();
+    //console.log(json);
+    let newWS = xlsx.utils.json_to_sheet(json);
+    xlsx.utils.book_append_sheet(newWB,newWS,name);
+    // file => create , replace
+    xlsx.writeFile(newWB,filePath);
 }
